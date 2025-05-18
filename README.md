@@ -196,10 +196,8 @@ chmod +x start-docker.sh
 
 2. Manual Docker CLI:
 ```
-# İmajı oluştur
 docker build -t securitynexus .
 
-# Konteyner başlat (interaktif mod)
 docker run -it --name securitynexus \
   -v $(pwd)/reports:/app/reports \
   -v $(pwd)/history:/app/history \
@@ -207,7 +205,7 @@ docker run -it --name securitynexus \
   securitynexus
 ```
 
-Windows PowerShell'de:
+Windows PowerShell:
 ```
 docker run -it --name securitynexus `
   -v ${PWD}/reports:/app/reports `
