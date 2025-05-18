@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  securitynexus:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - PYTHON_VERSION=3.11
+    image: securitynexus:latest
+    container_name: securitynexus
+    volumes:
+      - ./reports:/app/reports:rw
+      - ./history:/app/history:rw
+      - ./config:/app/config:rw
+    stdin_open: true  # -i parametresi
+    tty: true        # -t parametresi
+    restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1  # Python çıktılarının tamponlanmaması için
+      - NVIDIA_VISIBLE_DEVICES=""
+      - CUDA_VISIBLE_DEVICES=""
+      - NO_CUDA=1
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G

@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <title id="pageTitle">SecurityNexus Veri Dışa Aktarma - {date_str}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #ff0033;
+            --secondary: #990000;
+            --accent: #ff0000;
+            --background: #0a0a0a;
+            --card-bg: #151515;
+            --text: #cccccc;
+            --border: #333333;
+            --highlight: #ff3333;
+        }
+        
+        body {
+            font-family: 'Fira Code', monospace;
+            background-color: var(--background);
+            margin: 0;
+            padding: 0;
+            color: var(--text);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Matrix Arka Plan */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><text x="0" y="10" fill="%23ff0033" font-size="10">10100111</text><text x="10" y="20" fill="%23ff0033" font-size="10">01101001</text><text x="20" y="30" fill="%23ff0033" font-size="10">11001010</text><text x="30" y="40" fill="%23ff0033" font-size="10">00110101</text><text x="40" y="50" fill="%23ff0033" font-size="10">10101100</text><text x="50" y="60" fill="%23ff0033" font-size="10">01011001</text><text x="60" y="70" fill="%23ff0033" font-size="10">11010010</text><text x="70" y="80" fill="%23ff0033" font-size="10">01001101</text><text x="80" y="90" fill="%23ff0033" font-size="10">10010011</text></svg>');
+            opacity: 0.15;
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 15px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            color: white;
+            padding: 2rem;
+            border-radius: 10px 10px 0 0;
+            box-shadow: 0 4px 20px rgba(255, 0, 0, 0.3);
+            border: 1px solid var(--highlight);
+            border-bottom: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            animation: scanline 3s linear infinite;
+        }
+        
+        @keyframes scanline {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.2rem;
+            font-weight: 600;
+            text-shadow: 0 0 5px var(--highlight);
+            letter-spacing: 1px;
+        }
+        
+        .header p {
+            margin: 0.5rem 0 0;
+            opacity: 0.9;
+        }
+        
+        .content {
+            background-color: var(--card-bg);
+            border-radius: 0 0 10px 10px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border);
+            border-top: none;
+        }
+        
+        .info-card {
+            background-color: rgba(255, 0, 0, 0.05);
+            border-left: 5px solid var(--primary);
+            padding: 1rem;
+            margin-bottom: 2rem;
+            border-radius: 5px;
+        }
+        
+        .info-card p {
+            margin: 0.5rem 0;
+            font-size: 1rem;
+        }
+        
+        h2 {
+            color: var(--primary);
+            font-size: 1.8rem;
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        pre {
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 1rem;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-x: auto;
+            color: var(--accent);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            border: 1px solid var(--border);
+        }
+        
+        table {
+            width: 100%;
+            margin-bottom: 1rem;
+            color: var(--text);
+            border-collapse: collapse;
+        }
+        
+        table th,
+        table td {
+            padding: 0.75rem;
+            vertical-align: top;
+            border-top: 1px solid var(--border);
+        }
+        
+        table thead th {
+            vertical-align: bottom;
+            border-bottom: 2px solid var(--highlight);
+            background-color: rgba(255, 0, 0, 0.1);
+            color: white;
+        }
+        
+        table tbody tr:nth-of-type(odd) {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        table tbody tr:hover {
+            background-color: rgba(255, 0, 0, 0.1);
+        }
+        
+        .chart-container {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid var(--border);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.9rem;
+            color: #666;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+        
+        .threat-map {
+            height: 300px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+            border: 1px solid var(--border);
+            margin: 1rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .threat-map::before {
+            content: "Tehdit Haritası";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--text);
+            opacity: 0.2;
+            font-size: 2rem;
+            text-transform: uppercase;
+        }
+        
+        .pulse {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: var(--highlight);
+            border-radius: 50%;
+        }
+        
+        .pulse::before {
+            content: "";
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: rgba(255, 0, 0, 0.3);
+            transform: translate(-5px, -5px);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: translate(-5px, -5px) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-5px, -5px) scale(3);
+                opacity: 0;
+            }
+        }
+        
+        /* Koyu/Açık Tema Geçişi */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 10px rgba(255,0,0,0.5);
+        }
+        
+        /* Açık Tema Stilleri */
+        .light-theme {
+            --primary: #990000;
+            --secondary: #660000;
+            --accent: #990000;
+            --background: #f0f0f0;
+            --card-bg: #ffffff;
+            --text: #333333;
+            --border: #cccccc;
+            --highlight: #cc0000;
+        }
+        
+        .light-theme pre {
+            background-color: #f8f8f8;
+            color: #333;
+        }
+        
+        .light-theme table thead th {
+            background-color: rgba(153, 0, 0, 0.1);
+            color: #333;
+        }
+        
+        .light-theme body::before {
+            opacity: 0.03;
+        }
+        
+        .stat-card {
+            padding: 20px;
+            background-color: rgba(255, 0, 0, 0.05);
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+        
+        .stat-card .label {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        .stat-card .number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+        
+        .export-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .export-stats .stat-card {
+            flex: 1;
+            margin: 10px;
+            min-width: 200px;
+            text-align: center;
+        }
+        
+        /* Dil seçim butonları */
+        .lang-switcher {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            display: flex;
+            gap: 5px;
+        }
+        
+        .lang-button {
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .lang-button.active {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .light-theme .lang-button {
+            background: rgba(255,255,255,0.8);
+            color: #333;
+        }
+        
+        .light-theme .lang-button.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: 1.5rem;
+            }
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            .content {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="lang-switcher">
+        <button class="lang-button" onclick="changeLanguage('tr')">TR</button>
+        <button class="lang-button" onclick="changeLanguage('en')">EN</button>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeToggleButton">☀️</button>
+    <div class="container">
+        <div class="header">
+            <h1 id="reportTitle">SecurityNexus Veri Dışa Aktarma</h1>
+        </div>
+        <div class="content">
+            <div class="export-stats">
+                <div class="stat-card">
+                    <div class="label" id="totalRecordLabel">Toplam Kayıt</div>
+                    <div class="number">{record_count}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label" id="dateLabel">Tarih</div>
+                    <div class="number" style="font-size: 1.5rem">{formatted_date}</div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="activityChart"></canvas>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th id="timestampHeader">Zaman Damgası</th>
+                            <th id="operationHeader">İşlem</th>
+                            <th id="detailsHeader">Detaylar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {table_rows}
+                    </tbody>
+                </table>
+            </div>
+            <div class="footer">
+                <p id="footerText">SecurityNexus &copy; {year} | Modern Siber Güvenlik Aracı</p>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Çoklu dil desteği
+        const translations = {
+            tr: {
+                reportTitle: "SecurityNexus Veri Dışa Aktarma",
+                pageTitle: "SecurityNexus Veri Dışa Aktarma - {date_str}",
+                totalRecordLabel: "Toplam Kayıt",
+                dateLabel: "Tarih",
+                timestampHeader: "Zaman Damgası",
+                operationHeader: "İşlem",
+                detailsHeader: "Detaylar",
+                footerText: `SecurityNexus &copy; {year} | Modern Siber Güvenlik Aracı`,
+                chartTitle: "İşlem Türü Dağılımı",
+                toggleThemeLight: "☀️",
+                toggleThemeDark: "🌙",
+                noDataFound: "Veri bulunamadı",
+                loading: "Yükleniyor...",
+                exportAll: "Tümünü Dışa Aktar",
+                filterResults: "Sonuçları Filtrele",
+                successfulOperations: "Başarılı İşlemler",
+                failedOperations: "Başarısız İşlemler",
+                threatLevel: "Tehdit Seviyesi",
+                recordSource: "Kayıt Kaynağı",
+                recordID: "Kayıt ID",
+                reportGenerated: "Rapor oluşturuldu"
+            },
+            en: {
+                reportTitle: "SecurityNexus Data Export",
+                pageTitle: "SecurityNexus Data Export - {date_str}",
+                totalRecordLabel: "Total Records",
+                dateLabel: "Date",
+                timestampHeader: "Timestamp",
+                operationHeader: "Operation",
+                detailsHeader: "Details",
+                footerText: `SecurityNexus &copy; {year} | Modern Cybersecurity Tool`,
+                chartTitle: "Operation Type Distribution",
+                toggleThemeLight: "☀️",
+                toggleThemeDark: "🌙",
+                noDataFound: "No data found",
+                loading: "Loading...",
+                exportAll: "Export All",
+                filterResults: "Filter Results",
+                successfulOperations: "Successful Operations",
+                failedOperations: "Failed Operations",
+                threatLevel: "Threat Level",
+                recordSource: "Record Source",
+                recordID: "Record ID",
+                reportGenerated: "Report generated"
+            }
+        };
+        
+        // Dil değiştirme fonksiyonu
+        function changeLanguage(lang) {
+            // Dil butonlarını güncelle
+            document.querySelectorAll('.lang-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.lang-button[onclick="changeLanguage('${lang}')"]`).classList.add('active');
+            
+            // Dokuman başlığını güncelle
+            document.getElementById('pageTitle').textContent = translations[lang].pageTitle.replace('{date_str}', '{date_str}');
+            
+            // İçeriği güncelle
+            document.getElementById('reportTitle').textContent = translations[lang].reportTitle;
+            document.getElementById('totalRecordLabel').textContent = translations[lang].totalRecordLabel;
+            document.getElementById('dateLabel').textContent = translations[lang].dateLabel;
+            document.getElementById('timestampHeader').textContent = translations[lang].timestampHeader;
+            document.getElementById('operationHeader').textContent = translations[lang].operationHeader;
+            document.getElementById('detailsHeader').textContent = translations[lang].detailsHeader;
+            document.getElementById('footerText').textContent = translations[lang].footerText.replace('{year}', '{year}');
+            
+            // Grafiği güncelle
+            if (window.activityChart) {
+                window.activityChart.options.plugins.title.text = translations[lang].chartTitle;
+                window.activityChart.update();
+            }
+            
+            // Tema butonları
+            const themeButton = document.getElementById('themeToggleButton');
+            if (document.body.classList.contains('light-theme')) {
+                themeButton.innerHTML = translations[lang].toggleThemeDark;
+            } else {
+                themeButton.innerHTML = translations[lang].toggleThemeLight;
+            }
+            
+            // Dil tercihini localStorage'a kaydet
+            localStorage.setItem('prefLang', lang);
+        }
+        
+        // Koyu/Açık tema geçişi
+        function toggleTheme() {
+            const body = document.body;
+            const themeToggle = document.querySelector('.theme-toggle');
+            const currentLang = localStorage.getItem('prefLang') || 'tr';
+            
+            if (body.classList.contains('light-theme')) {
+                body.classList.remove('light-theme');
+                themeToggle.innerHTML = translations[currentLang].toggleThemeLight;
+                localStorage.setItem('theme', 'dark');
+                updateChartColors(false);
+            } else {
+                body.classList.add('light-theme');
+                themeToggle.innerHTML = translations[currentLang].toggleThemeDark;
+                localStorage.setItem('theme', 'light');
+                updateChartColors(true);
+            }
+        }
+        
+        // Sayfa yüklendiğinde kullanıcının tema ve dil tercihini kontrol et
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tema tercihi
+            const savedTheme = localStorage.getItem('theme');
+            const themeToggle = document.querySelector('.theme-toggle');
+            const currentLang = localStorage.getItem('prefLang') || 'tr';
+            
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-theme');
+                themeToggle.innerHTML = translations[currentLang].toggleThemeDark;
+            }
+            
+            // Dil tercihi
+            const savedLang = localStorage.getItem('prefLang') || 'tr'; // Varsayılan Türkçe
+            changeLanguage(savedLang);
+            
+            // Aktivite grafiği oluştur
+            createActivityChart();
+        });
+
+        // Aktivite grafiği
+        function createActivityChart() {
+            const ctx = document.getElementById('activityChart').getContext('2d');
+            
+            // Veri kategorileri ve sayıları
+            const actionTypes = {actionTypes_json};
+            
+            const labels = Object.keys(actionTypes);
+            const data = Object.values(actionTypes);
+            
+            const isLight = document.body.classList.contains('light-theme');
+            const currentLang = localStorage.getItem('prefLang') || 'tr';
+            
+            window.activityChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: [
+                            'rgba(255, 0, 0, 0.7)',
+                            'rgba(255, 51, 51, 0.7)',
+                            'rgba(204, 0, 0, 0.7)',
+                            'rgba(255, 102, 102, 0.7)',
+                            'rgba(153, 0, 0, 0.7)',
+                            'rgba(255, 153, 153, 0.7)'
+                        ],
+                        borderColor: '#151515',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: isLight ? '#333' : '#ccc',
+                                font: {
+                                    family: "'Fira Code', monospace"
+                                }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: translations[currentLang].chartTitle,
+                            color: isLight ? '#333' : '#ccc',
+                            font: {
+                                size: 16,
+                                family: "'Fira Code', monospace"
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Tema değişikliğinde grafik renklerini güncelle
+            window.updateChartColors = function(isLight) {
+                activityChart.options.plugins.legend.labels.color = isLight ? '#333' : '#ccc';
+                activityChart.options.plugins.title.color = isLight ? '#333' : '#ccc';
+                activityChart.update();
+            };
+        }
+    </script>
+</body>
+</html> 

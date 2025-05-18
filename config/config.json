@@ -1,0 +1,31 @@
+{
+    "settings": {
+        "language": "en",
+        "save_reports": true,
+        "report_format": "html",
+        "reports_folder": "reports",
+        "history_folder": "history",
+        "auto_update": true,
+        "update_check_interval_days": 7,
+        "default_timeout": 10,
+        "max_concurrent_tasks": 3
+    },
+    "api": {
+        "api_key": "change_this_to_secure_api_key",
+        "enabled": true
+    },
+    "api_keys": {
+        "hackertarget": "",
+        "hibp": "",
+        "misp": "",
+        "otx": "",
+        "threatfox": "",
+        "shodan": ""
+    },
+    "last_update_check": "2025-05-18",
+    "license_accepted": false,
+    "language_options": [
+        "en",
+        "tr"
+    ]
+}
